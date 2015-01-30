@@ -1,0 +1,9 @@
+---
+# Test playbook
+- hosts: 127.0.0.1
+  connection: local
+  roles:
+    - { role: nuada.dockerize, timezone: "Europe/Warsaw" }
+  tasks:
+    - name: install wget
+      apt: name=wget state=present update_cache=yes

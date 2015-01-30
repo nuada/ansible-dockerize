@@ -1,0 +1,5 @@
+---
+locale: "en_US.UTF-8"
+language: "{{ locale }}"
+lc_all: "{{ locale }}"
+timezone: "Etc/UTC"

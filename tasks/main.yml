@@ -1,0 +1,38 @@
+---
+# https://journal.paul.querna.org/articles/2013/10/15/docker-ubuntu-on-rackspace/
+- name: apt - force unsafe IO
+  copy: dest=/etc/dpkg/dpkg.cfg.d/02apt-speedup content='force-unsafe-io'
+          owner=root group=root mode=0644
+
+- name: apt - disable cache
+  copy: dest=/etc/apt/apt.conf.d/00no-cache content='DPkg::Post-Invoke {"/bin/rm -f /var/cache/apt/archives/*.deb || true";};'
+          owner=root group=root mode=0644
+  notify:
+    - apt cleanup
+
+- name: divert ischroot
+  command: /usr/bin/dpkg-divert --local --rename --add /usr/bin/ischroot
+
+- name: ischroot = yes
+  file: src=/bin/true dest=/usr/bin/ischroot state=link
+          owner=root group=root
+
+# https://github.com/dotcloud/docker/issues/1024
+- name: divert initctl
+  command: /usr/bin/dpkg-divert --local --rename --add /sbin/initctl
+
+- name: initctl = yes
+  file: src=/bin/true dest=/sbin/initctl state=link force=yes
+          owner=root group=root
+
+- name: generate locales
+  command: /usr/sbin/locale-gen "{{ locale }}"
+
+- name: set locale
+  command: /usr/sbin/update-locale LANG="{{ language }}" LC_ALL="{{ lc_all }}"
+
+- name: set timezone
+  copy: dest=/etc/timezone content="{{ timezone }}"
+
+- name: configure timezone
+  command: /usr/sbin/dpkg-reconfigure tzdata
